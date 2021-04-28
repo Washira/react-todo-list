@@ -29,13 +29,16 @@ function App() {
   };
 
   return (
-    <div style={renderAppStyles()}>
-      <h1>Todo-List</h1>
-      <Form />
-      <List />
+    <div>
+      <div style={renderAppStyles()}>
+        <h1>Todo-List</h1>
+        <Form />
+      </div>
+      <div style={renderAppStyles()}>
+        <List />
+      </div>
     </div>
   );
 }
 
 export default App;
-

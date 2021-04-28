@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import Button from "react-bootstrap/Button";
 
 class Form extends Component {
   constructor(props) {
@@ -12,8 +13,9 @@ class Form extends Component {
     };
   }
 
-  titleOnChange = (e) => {
-    this.setState({ title: e.target.value });
+  titleOnChange = async (e) => {
+    await this.setState({ title: e.target.value });
+    return true;
   };
 
   startOnChange = (e) => {
@@ -53,26 +55,34 @@ class Form extends Component {
           <div>
             <label>Title : </label>
           </div>
+          <div>
+            <input type="text" required onChange={this.titleOnChange} />
+          </div>
 
-          <input type="text" onChange={this.titleOnChange} />
           <br />
           <div>
-            <label>Start Date : </label>
+            <label>
+              Start Date : <input type="text" required onChange={this.startOnChange} />{" "}
+              <span>(YYYY-MM-Dd)</span>
+            </label>
           </div>
-          <input type="text" onChange={this.startOnChange} />
+
           <br />
           <div>
-            <label>Finish Date : </label>
+            <label>
+              Finish Date : <input type="text" required onChange={this.endOnChange} />{" "}
+              <span>(YYYY-MM-DD)</span>
+            </label>
           </div>
-          <input type="text" onChange={this.endOnChange} />
+
           <br />
-          <button
+          <Button
             className="add-btn"
             type="submit"
             style={{ marginTop: "1em" }}
           >
             Add
-          </button>
+          </Button>
         </form>
       </div>
     );
