@@ -34,6 +34,7 @@ class List extends Component {
   };
 
   render() {
+    console.log('Component is re-rendered');
     return (
       <div>
         <ListGroup>

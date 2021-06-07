@@ -2,9 +2,13 @@ import React, { Component } from "react";
 import axios from "axios";
 
 class Todo extends Component {
+  constructor(props){
+    super(props);
+    this.deleteTodo = this.deleteTodo.bind(this);
+  };
 
-  deleteTodo = () => {
-    axios
+  deleteTodo = async() => {
+    await axios
       .delete("http://localhost:5000/todo/delete-todo/" + this.props.obj._id)
       .then((res) => {
         console.log("Stormtrooper successfully deleted!");
