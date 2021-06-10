@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
-import { appStyleMax, appStyleMin } from "./styles";
+import { renderAppStyles } from "./styles";
+import Edit from "./Edit";
 
 function Form() {
   const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
-  const [clicked, setClicked] = useState("");
+  const [clicked, setClicked] = useState(false);
 
   const persist = (newTodos) => {
     fetch("http://localhost:5000/todo/create-todo", {
@@ -19,34 +20,65 @@ function Form() {
     });
   };
 
-  const createTodo = (e) => {
-    e.preventDefault();
+  const createTodo = async (e) => {
+    await e.preventDefault();
     if (!title) {
       return;
     }
-    const newTodo = { title: title, start: start, end: end };
-    const newTodos = [...todos, newTodo];
-    setTodos(newTodos);
-    setTitle("");
-    setStart("");
-    setEnd("");
-    persist(newTodos);
+    const newTodo = await {
+      title: title,
+      start: start,
+      end: end,
+      clicked: clicked,
+    };
+    const newTodos = await [...todos, newTodo];
+    await setTodos(newTodos);
+    await setTitle("");
+    await setStart("");
+    await setEnd("");
+    await persist(newTodos);
+    await loadData();
   };
 
-  useEffect(() => {
-    fetch("http://localhost:5000/todo/", {
+  const loadData = async () => {
+    const data = await fetch("http://localhost:5000/todo", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
+    });
+    const response = await data.json();
+    setTodos(response);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const editClicked = (id, title, start, end, clicked) => {
+    fetch(`http://localhost:5000/todo/update-todo/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title,
+        start: start,
+        end: end,
+        clicked: !clicked,
+      }),
     })
       .then((response) => response.json())
-      .then((todos) => setTodos(todos));
-  });
+      .then((data) => {
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
 
-  const deleteTodo = (id) => {
-    const todoId = id.toString();
-    fetch("http://localhost:5000/todo/delete-todo/" + todoId, {
+  const deleteTodo = async (id) => {
+    fetch(`http://localhost:5000/todo/delete-todo/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -56,17 +88,18 @@ function Form() {
       .catch((error) => {
         console.log(error);
       });
+    await loadData();
   };
 
   const getTodos = () => {
     return todos;
   };
 
-  const renderAppStyles = () => {
-    if (window.innerWidth <= 375) {
-      return appStyleMin;
-    }
-    return appStyleMax;
+  const editButton = async (id, title, start, end, clicked) => {
+    await editClicked(id, title, start, end, clicked);
+    await console.log(clicked);
+    await setClicked(false);
+    await loadData();
   };
 
   return (
@@ -74,41 +107,38 @@ function Form() {
       <div style={renderAppStyles()}>
         <h1>Todo-List</h1>
         <form onSubmit={createTodo}>
-          <div>
-            <label>Title : </label>
-          </div>
-          <div>
-            <input
-              type="text"
-              value={title}
-              required
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-          <br />
+          <div></div>
           <div>
             <label>
-              Start Date :{" "}
+              Title :{" "}
               <input
                 type="text"
-                value={start}
+                value={title}
                 required
-                onChange={(e) => setStart(e.target.value)}
-              />{" "}
-              <span>(YYYY-MM-DD)</span>
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </label>
           </div>
           <br />
           <div>
             <label>
-              Finish Date :{" "}
+              Starting Date :{" "}
+              <input
+                type="text"
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+              />
+            </label>
+          </div>
+          <br />
+          <div>
+            <label>
+              Finished Date :{" "}
               <input
                 type="text"
                 value={end}
-                required
                 onChange={(e) => setEnd(e.target.value)}
-              />{" "}
-              <span>(YYYY-MM-DD)</span>
+              />
             </label>
           </div>
           <br />
@@ -121,14 +151,44 @@ function Form() {
           </Button>
         </form>
       </div>
-      <div style={renderAppStyles()}>
-        {getTodos().map((todo) => (
-          <div key={todo._id}>
+
+      <div>
+        {getTodos().map((todo, index) => (
+          <div key={index} style={renderAppStyles()}>
             <h1>{todo.title}</h1>
-            <p>Start at : {todo.start}</p>
-            <p>Finish at : {todo.end}</p>
-            <button className="delete-btn" onClick={() => deleteTodo(todo._id)}>Delete</button>
-            <button className="complete-btn">Edit</button>
+            <p>Starting at : {todo.start}</p>
+            <p>Finished at : {todo.end}</p>
+            <button className="delete-btn" onClick={() => deleteTodo(todo._id)}>
+              Delete
+            </button>
+            <button
+              className="complete-btn"
+              onClick={() =>
+                editButton(
+                  todo._id,
+                  todo.title,
+                  todo.start,
+                  todo.end,
+                  todo.clicked
+                )
+              }
+            >
+              Edit
+            </button>
+            {todo.clicked ? (
+              <Edit
+                data={{
+                  id: todo._id,
+                  title: todo.title,
+                  start: todo.start,
+                  end: todo.end,
+                  clicked: todo.clicked,
+                }}
+                editButton={editButton}
+              />
+            ) : (
+              ""
+            )}
           </div>
         ))}
       </div>
@@ -137,4 +197,3 @@ function Form() {
 }
 
 export default Form;
-
