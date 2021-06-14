@@ -1,11 +1,10 @@
-let mongoose = require("mongoose"),
-  express = require("express"),
+let express = require("express"),
   router = express.Router();
 
-// Model
+// Todolist Model
 let todoSchema = require("../models/Todolist");
 
-//Create
+//Create todo
 router.route("/create-todo").post((req, res, next) => {
   todoSchema.create(req.body, (error, data) => {
     if (error) {
@@ -17,8 +16,8 @@ router.route("/create-todo").post((req, res, next) => {
   });
 });
 
-//Read
-router.route("/").get((req, res) => {
+//Read Todo
+router.route("/").get((req, res, next) => {
   todoSchema.find((error, data) => {
     if (error) {
       return next(error);
@@ -28,9 +27,9 @@ router.route("/").get((req, res) => {
   });
 });
 
-//Get Single Item
-router.route("/edit-todo/:id").get((req, res) => {
-  todoSchemaa.findById(req.params.id, (error, data) => {
+//Get Single Todolist
+router.route("/edit-todo/:id").get((req, res, next) => {
+  todoSchema.findById(req.params.id, (error, data) => {
     if (error) {
       return next(error);
     } else {
@@ -39,7 +38,7 @@ router.route("/edit-todo/:id").get((req, res) => {
   });
 });
 
-//Update
+//Update Todolist
 router.route("/update-todo/:id").put((req, res, next) => {
   todoSchema.findByIdAndUpdate(
     req.params.id,
@@ -52,13 +51,13 @@ router.route("/update-todo/:id").put((req, res, next) => {
         return next(error);
       } else {
         res.json(data);
-        console.log("Stormtrooper successfully updated");
+        console.log("Todolist successfully updated");
       }
     }
   );
 });
 
-//Delete
+//Delete Todolist
 router.route("/delete-todo/:id").delete((req, res, next) => {
   todoSchema.findByIdAndRemove(req.params.id, (error, data) => {
     if (error) {
